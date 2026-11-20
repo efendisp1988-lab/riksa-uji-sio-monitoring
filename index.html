@@ -1068,9 +1068,9 @@ function exportExcel(){
  const buildSheet=(name,headers,rows)=>{
   const matrix=[[company],...(region?[[region]]:[]),[page==='riksa'?'LAPORAN MONITORING RIKSA UJI':'LAPORAN MONITORING SIO & LISENSI K3'],headers,...rows];
   const colCount=headers.length;
-  const widths=headers.map((h,i)=>Math.min(60,Math.max(12,...matrix.map(r=>String(r[i]??'').length+2))));
+  const widths=headers.map((h,i)=>Math.min(80,Math.max(14,...matrix.map(r=>String(r[i]??'').length+3))));
   const row=(cells,style)=>'<Row>'+Array.from({length:colCount},(_,i)=>'<Cell'+(style?' ss:StyleID="'+style+'"':'')+'><Data ss:Type="String">'+xmlEsc(cells[i]??'')+'</Data></Cell>').join('')+'</Row>';
-  const cols=widths.map(w=>'<Column ss:AutoFitWidth="0" ss:Width="'+Math.max(65,Math.min(300,w*7))+'"/>').join('');
+  const cols=widths.map(w=>'<Column ss:AutoFitWidth="0" ss:Width="'+Math.max(90,Math.min(420,w*7))+'"/>').join('');
   const topRows=matrix.slice(0,region?3:2).map((r,i)=>row(r,'Title')).join('');
   const headerRow=row(headers,'Header');
   const bodyRows=rows.map(r=>row(r,'Body')).join('');
