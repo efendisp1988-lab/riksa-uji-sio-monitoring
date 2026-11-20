@@ -973,16 +973,72 @@ function filter(){let q=$('q').value.toLowerCase(),l=$('loc').value,s=$('sf').va
 function addYears(date,years){if(!date)return'';let d=new Date(date+'T12:00:00');let day=d.getDate();d.setFullYear(d.getFullYear()+Number(years));if(d.getDate()!==day)d.setDate(0);return d.toISOString().slice(0,10)}
 function intervalFor(cat,type){if(cat==='Pesawat Tenaga Produksi'||cat==='Mesin Tenaga Produksi')return 1;if(cat==='Alat Berat')return type==='Awal'?2:1;return 2}
 function updateDue(){let cat=document.querySelector('[name=cat]')?.value,type=document.querySelector('[name=inspectionType]')?.value,date=document.querySelector('[name=issued]')?.value;let years=intervalFor(cat,type);let due=addYears(date,years);let hint=document.getElementById('periodHint');if(hint)hint.textContent='Interval otomatis: '+years+' tahun. Perkiraan jatuh tempo: '+(due||'-')+'. Tanggal sertifikat tetap menjadi acuan.';let field=document.querySelector('[name=due]');if(field&&date&&!field.dataset.manual)field.value=due}
-function form(id){editId=id||null;let x=id?db[page].find(z=>z.id===id):{},opts=page==='riksa'?['Alat Berat','Mesin Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];let isRiksa=page==='riksa';$('modal').innerHTML='<div class="modal"><div class="box"><div class="eyebrow">KLJ MONITORING / INPUT DATA</div><h2>'+(id?'Ubah':'Tambah')+' Data '+(isRiksa?'Riksa Uji':'SIO / Lisensi')+'</h2><form onsubmit="saveForm(event)"><div class="formgrid">'+
-'<div class="field"><label>Estate / Lokasi</label><input name="loc" list="locations" value="'+esc(x.loc)+'" placeholder="Contoh: SBAE" required><datalist id="locations"><option>SBAE</option><option>SPKE</option><option>SPIE</option><option>Mill</option></datalist></div>'+
-'<div class="field"><label>Kategori Peralatan</label><select name="cat" onchange="updateDue()">'+opts.map(o=>'<option '+(x.cat===o?'selected':'')+'>'+o+'</option>').join('')+'</select></div>'+
-'<div class="field"><label>Uraian / Nama Peralatan</label><input name="name" required value="'+esc(x.name)+'" placeholder="Nama atau identitas peralatan"></div>'+
-'<div class="field"><label>Nomor IO</label><input name="io" value="'+esc(x.io)+'"></div>'+
-(isRiksa?'<div class="field"><label>Nomor Rangka</label><input name="frame" value="'+esc(x.frame)+'"></div><div class="field"><label>Nomor Mesin</label><input name="engine" value="'+esc(x.engine)+'"></div><div class="field"><label>Tahun Pembuatan</label><input name="year" type="number" value="'+esc(x.year)+'"></div><div class="field"><label>Kapasitas / HP</label><input name="capacity" value="'+esc(x.capacity)+'"></div><div class="field"><label>Unit Mesin / Jenis Alat</label><input name="unit" value="'+esc(x.unit)+'"></div><div class="field"><label>Status Peralatan</label><select name="equipmentStatus"><option>Aktif</option><option '+(x.equipmentStatus==='Tidak Aktif'?'selected':'')+'>Tidak Aktif</option><option '+(x.equipmentStatus==='Breakdown'?'selected':'')+'>Breakdown</option></select></div>'+
-'<div class="field"><label>Jenis Pemeriksaan</label><select name="inspectionType" onchange="updateDue()"><option '+(x.inspectionType!=='Berkala'?'selected':'')+'>Awal</option><option '+(x.inspectionType==='Berkala'?'selected':'')+'>Berkala</option></select></div><div class="field"><label>Tanggal Riksa Uji</label><input type="date" name="issued" value="'+esc(x.issued)+'" onchange="updateDue()"></div><div class="field"><label>Nomor Riksa Uji</label><input name="no" value="'+esc(x.no)+'"></div><div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="due" value="'+esc(x.due)+'" ></div><div class="field wide"><div id="periodHint" class="small">Periode pemeriksaan akan dihitung otomatis berdasarkan kategori.</div></div><div class="field"><label>Masa Berlaku</label><input name="validity" value="'+esc(x.validity)+'" placeholder="Contoh: 1 tahun"></div><div class="field"><label>Pelaksana Riksa Uji</label><input name="issuer" value="'+esc(x.issuer)+'"></div><div class="field wide"><label>Peraturan & Perundangan</label><input name="regulation" value="'+esc(x.regulation)+'"></div>':
-'<div class="field"><label>Nomor Sertifikat / Registrasi</label><input name="no" value="'+esc(x.no)+'"></div><div class="field"><label>Tanggal Terbit</label><input type="date" name="issued" value="'+esc(x.issued)+'"></div><div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="due" value="'+esc(x.due)+'"></div><div class="field"><label>Status Kepegawaian</label><select name="employment"><option>Aktif</option><option '+(x.employment==='Resign'?'selected':'')+'>Resign</option></select></div><div class="field"><label>Penerbit / Pelaksana Training</label><input name="issuer" value="'+esc(x.issuer)+'"></div>')+
-'<div class="field wide"><label>Keterangan</label><textarea name="notes">'+esc(x.notes)+'</textarea></div></div><div class="toolbar"><button class="p">Simpan Data</button><button type="button" class="l" onclick="closeModal()">Batal</button></div></form></div></div>';if(isRiksa&&x.issued)updateDue()}
-function saveForm(e){e.preventDefault();let o=Object.fromEntries(new FormData(e.target));o.id=editId||Date.now().toString();o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';let i=db[page].findIndex(x=>x.id===o.id);if(page==='riksa'){let old=i>=0?db[page][i]:null;o.inspections=old?.inspections||[];if(o.issued){let record={type:o.inspectionType||'Awal',date:o.issued,due:o.due,no:o.no||'',issuer:o.issuer||''};if(old?.issued&&old.issued===o.issued){o.inspections=o.inspections.map(h=>h.date===o.issued?record:h);if(!o.inspections.some(h=>h.date===o.issued))o.inspections.push(record)}else if(!o.inspections.some(h=>h.date===o.issued))o.inspections.push(record)}o.inspections.sort((a,b)=>(a.date||'').localeCompare(b.date||''));}if(i>=0){db[page][i]=o;log('Ubah',o.name,o.mod)}else{db[page].push(o);log('Tambah',o.name,o.mod)}save();closeModal();render()}
+function form(id){
+ editId=id||null;
+ let x=id?db[page].find(z=>z.id===id):{};
+ const isRiksa=page==='riksa';
+ const opts=isRiksa?['Alat Berat','Mesin Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
+ const escv=v=>esc(v??'');
+ const hist=(x.inspections||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+ const count=isRiksa?(x.cat==='Alat Berat'?4:5):0;
+ const historyRows=isRiksa?Array.from({length:Math.max(count,hist.length,1)},(_,i)=>{
+  const h=hist[i]||{};
+  return '<div class="history-input-row"><div class="history-row-title">Pemeriksaan Ke-'+(i+1)+'</div>'+
+   '<div class="field"><label>Nomor Riksa Uji</label><input name="histNo[]" value="'+escv(h.no)+'" placeholder="Nomor sertifikat / riksa uji"></div>'+
+   '<div class="field"><label>Tanggal Riksa Uji</label><input type="date" name="histDate[]" value="'+escv(h.date)+'"></div>'+
+   '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="histDue[]" value="'+escv(h.due)+'"></div>'+
+   '<div class="field"><label>Masa Berlaku</label><input name="histValidity[]" value="'+escv(h.validity)+'" placeholder="Contoh: 1 TAHUN"></div></div>';
+ }).join(''):'';
+ $('modal').innerHTML='<div class="modal"><div class="box"><div class="eyebrow">KLJ MONITORING / INPUT DATA</div><h2>'+(id?'Ubah':'Tambah')+' Data '+(isRiksa?'Riksa Uji':'SIO / Lisensi K3')+'</h2>'+
+ '<div class="notice">Formulir disusun mengikuti kolom workbook monitoring PT Kruing Lestari Jaya. Kolom yang tidak relevan dapat dikosongkan.</div>'+
+ '<form id="monitorForm" onsubmit="saveForm(event)"><div class="form-section"><h3>Identitas & Lokasi</h3><div class="formgrid">'+
+ '<div class="field"><label>Estate / Lokasi</label><input name="loc" list="locations" value="'+escv(x.loc)+'" placeholder="SBAE / SPKE / SPIE / Mill" required><datalist id="locations"><option>SBAE</option><option>SPKE</option><option>SPIE</option><option>Mill</option><option>Mill & Pabrik</option><option>Mill & Bulking</option></datalist></div>'+
+ '<div class="field"><label>'+(isRiksa?'Kategori Peralatan':'Uraian / Jenis Lisensi')+'</label><select name="cat" required>'+opts.map(o=>'<option '+(x.cat===o?'selected':'')+'>'+o+'</option>').join('')+'</select></div>'+
+ (isRiksa?
+ '<div class="field"><label>Uraian</label><input name="name" required value="'+escv(x.name)+'" placeholder="Contoh: GENSET / TRAKTOR MINI"></div>'+
+ '<div class="field"><label>Nomor IO</label><input name="io" value="'+escv(x.io)+'"></div>'+
+ '<div class="field"><label>Nomor Rangka</label><input name="frame" value="'+escv(x.frame)+'"></div>'+
+ '<div class="field"><label>Nomor Mesin</label><input name="engine" value="'+escv(x.engine)+'"></div>'+
+ '<div class="field"><label>Tahun Pembuatan</label><input name="year" type="number" value="'+escv(x.year)+'"></div>'+
+ '<div class="field"><label>HP / Kapasitas</label><input name="capacity" value="'+escv(x.capacity)+'" placeholder="Contoh: 45 HP / 100 KVA"></div>'+
+ '<div class="field"><label>Unit Mesin / Jenis Alat</label><input name="unit" value="'+escv(x.unit)+'"></div>'+
+ '<div class="field"><label>Status Peralatan</label><select name="equipmentStatus"><option '+(x.equipmentStatus==='AKTIF'?'selected':'')+'>AKTIF</option><option '+(x.equipmentStatus==='TDK AKTIF'?'selected':'')+'>TDK AKTIF</option><option '+(x.equipmentStatus==='BREAKDOWN'?'selected':'')+'>BREAKDOWN</option></select></div>'
+ :
+ '<div class="field"><label>Nama Pemegang Lisensi</label><input name="name" required value="'+escv(x.name)+'"></div>'+
+ '<div class="field"><label>Jenis Lisensi</label><input name="licenseType" value="'+escv(x.licenseType)+'" placeholder="SIO Operator Pesawat Angkat dan Angkut"></div>'+
+ '<div class="field"><label>Unit Mesin / Alat Berat</label><input name="unit" value="'+escv(x.unit)+'"></div>'+
+ '<div class="field"><label>Nomor Perizinan / Registrasi</label><input name="no" value="'+escv(x.no)+'"></div>'+
+ '<div class="field"><label>Masa Berlaku (sesuai dokumen)</label><input name="validity" value="'+escv(x.validity)+'" placeholder="Contoh: 5 Tahun (s/d 01 Maret 2029)"></div>'+
+ '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="due" value="'+escv(x.due)+'"></div>'+
+ '<div class="field"><label>Status Kepegawaian</label><select name="employment"><option '+(x.employment!=='RESIGN'?'selected':'')+'>AKTIF</option><option '+(x.employment==='RESIGN'?'selected':'')+'>RESIGN</option><option '+(x.employment==='BELUM TRAINING'?'selected':'')+'>BELUM TRAINING</option></select></div>'
+ )+
+ '</div></div>'+
+ (isRiksa?'<div class="form-section"><h3>Riwayat Riksa Uji</h3><p class="small muted">Masukkan setiap pemeriksaan pada baris tersendiri. Data pemeriksaan sebelumnya tetap disimpan, tidak ditimpa.</p><div id="historyRows">'+historyRows+'</div></div>':'')+
+ '<div class="form-section"><h3>Informasi Perizinan & Keterangan</h3><div class="formgrid">'+
+ '<div class="field"><label>Perizinan / Pelaksana Training Oleh</label><input name="issuer" value="'+escv(x.issuer)+'"></div>'+
+ '<div class="field"><label>Peraturan & Perundangan</label><input name="regulation" value="'+escv(x.regulation)+'"></div>'+
+ (!isRiksa?'<div class="field"><label>Ketaatan Peraturan</label><input name="compliance" value="'+escv(x.compliance)+'"></div>':'')+
+ '<div class="field wide"><label>Keterangan</label><textarea name="notes" rows="3">'+escv(x.notes)+'</textarea></div></div></div>'+
+ '<div class="toolbar"><button class="p" type="submit">Simpan Data</button><button type="button" class="l" onclick="closeModal()">Batal</button></div></form></div></div>';
+}
+function saveForm(e){
+ e.preventDefault();
+ const f=new FormData(e.target),o=Object.fromEntries(f.entries());
+ o.id=editId||Date.now().toString();o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';
+ const i=db[page].findIndex(x=>x.id===o.id),old=i>=0?db[page][i]:null;
+ if(page==='riksa'){
+  const dates=f.getAll('histDate[]'),dues=f.getAll('histDue[]'),nos=f.getAll('histNo[]'),valids=f.getAll('histValidity[]');
+  o.inspections=dates.map((date,j)=>({type:j===0?'Awal':'Berkala',date:date||'',due:dues[j]||'',no:nos[j]||'',validity:valids[j]||'',issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
+  const latest=o.inspections.filter(h=>h.date||h.due||h.no).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).pop();
+  o.issued=latest?.date||'';o.due=latest?.due||'';o.no=latest?.no||'';o.validity=latest?.validity||'';
+ } else {
+  o.issued=old?.issued||'';
+  o.inspections=old?.inspections||[];
+ }
+ if(i>=0){db[page][i]={...old,...o};log('Ubah',o.name,o.mod)}
+ else{db[page].push(o);log('Tambah',o.name,o.mod)}
+ save();closeModal();render();
+}
 function closeModal(){$('modal').innerHTML=''}function log(action,name,mod){db.history.push({at:new Date().toLocaleString('id-ID'),mod,action,name})}function del(id){let x=db[page].find(z=>z.id===id);if(x&&confirm('Hapus '+x.name+'?')){db[page]=db[page].filter(z=>z.id!==id);log('Hapus',x.name,x.mod);save();render()}}
 function exportCsv(){let keys=['name','cat','loc','no','issued','due','employment','issuer','frame','engine','notes'],rows=[keys.join(','),...db[page].map(x=>keys.map(k=>'"'+String(x[k]||'').replace(/"/g,'""')+'"').join(','))];download(rows.join('\r\n'),page+'_monitoring.csv','text/csv')}
 function importCsv(){let f=document.createElement('input');f.type='file';f.accept='.csv';f.onchange=()=>{let rd=new FileReader();rd.onload=()=>{let lines=String(rd.result).split(/\r?\n/).filter(Boolean);if(lines.length<2)return alert('CSV kosong.');let h=lines[0].split(',').map(x=>x.replace(/^"|"$/g,'').trim());if(!confirm('Tambahkan '+(lines.length-1)+' baris CSV? Header harus sesuai kolom ekspor aplikasi.'))return;let n=0;lines.slice(1).forEach(line=>{let v=line.split(',').map(x=>x.replace(/^"|"$/g,'')),o={};h.forEach((k,i)=>o[k]=v[i]||'');if(o.name){o.id=Date.now()+''+Math.random();o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';db[page].push(o);n++}});log('Impor CSV '+n+' baris','Impor data',page);save();render();alert(n+' baris ditambahkan. Periksa hasilnya.')};rd.readAsText(f.files[0])};f.click()}
