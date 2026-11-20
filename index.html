@@ -986,6 +986,7 @@ function form(id){
  const historyRows=isRiksa?Array.from({length:Math.max(count,hist.length,1)},(_,i)=>{
   const h=hist[i]||{};
   return '<details class="history-input-row" '+(i===0?'open':'')+'><summary class="history-row-title">Pemeriksaan Ke-'+(i+1)+(h.date?' · '+escv(h.date):'')+'</summary><div class="history-row-body">'+
+   '<div class="field"><label>Jenis Riksa Uji</label><select name="histType[]"><option value="AWAL" '+((h.type||'AWAL')==='AWAL'?'selected':'')+'>AWAL</option><option value="BERKALA" '+(h.type==='BERKALA'?'selected':'')+'>BERKALA</option></select></div>'+
    '<div class="field"><label>Nomor Riksa Uji</label><input name="histNo[]" value="'+escv(h.no)+'" placeholder="Nomor sertifikat / riksa uji"></div>'+
    '<div class="field"><label>Tanggal Riksa Uji</label><input type="date" name="histDate[]" value="'+escv(h.date)+'" onchange="updateHistoryDue(this)"></div>'+
    '<div class="field"><label>Masa Berlaku</label><select name="histValidity[]" onchange="updateHistoryDue(this)"><option value="">Pilih periode</option>'+[1,2,3,4,5].map(n=>'<option value="'+n+' Tahun" '+(String(h.validity||'').toLowerCase().includes(String(n))?'selected':'')+'>'+n+' Tahun</option>').join('')+'</select></div>'+
@@ -1030,7 +1031,7 @@ function saveForm(e){
  const i=db[page].findIndex(x=>x.id===o.id),old=i>=0?db[page][i]:null;
  if(page==='riksa'){
   const dates=f.getAll('histDate[]'),dues=f.getAll('histDue[]'),nos=f.getAll('histNo[]'),valids=f.getAll('histValidity[]');
-  o.inspections=dates.map((date,j)=>({type:j===0?'Awal':'Berkala',date:date||'',due:dues[j]||'',no:nos[j]||'',validity:valids[j]||'',issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
+  const types=f.getAll('histType[]');o.inspections=dates.map((date,j)=>({type:types[j]||'AWAL',date:date||'',due:dues[j]||'',no:nos[j]||'',validity:valids[j]||'',issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
   const latest=o.inspections.filter(h=>h.date||h.due||h.no).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).pop();
   o.issued=latest?.date||'';o.due=latest?.due||'';o.no=latest?.no||'';o.validity=latest?.validity||'';
  } else {
