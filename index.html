@@ -982,7 +982,7 @@ function form(id){
  const opts=isRiksa?['Alat Berat / Pesawat Angkat dan Angkut','Genset / Pesawat Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
  const escv=v=>esc(v??'');
  const hist=(x.inspections||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
- const count=isRiksa?(x.cat==='Alat Berat / Pesawat Angkat dan Angkut'?4:5):0;
+ const count=isRiksa?Math.max((x.cat==='Alat Berat / Pesawat Angkat dan Angkut'?4:5),hist.length+1):0;
  const historyRows=isRiksa?Array.from({length:Math.max(count,hist.length,1)},(_,i)=>{
   const h=hist[i]||{};
   return '<details class="history-input-row" '+(i===0?'open':'')+'><summary class="history-row-title">Pemeriksaan Ke-'+(i+1)+(h.date?' · '+escv(h.date):'')+'</summary><div class="history-row-body">'+
@@ -993,7 +993,7 @@ function form(id){
    '<div class="field"><label>Tanggal Jatuh Tempo (otomatis)</label><input type="date" name="histDue[]" value="'+escv(h.due)+'" readonly></div></div></details>';
  }).join(''):'';
  $('modal').innerHTML='<div class="modal"><div class="box"><div class="eyebrow">KLJ MONITORING / INPUT DATA</div><h2>'+(id?'Ubah':'Tambah')+' Data '+(isRiksa?'Riksa Uji':'SIO / Lisensi K3')+'</h2>'+
- '<div class="notice">Formulir disusun mengikuti kolom workbook monitoring PT Kruing Lestari Jaya. Kolom yang tidak relevan dapat dikosongkan.</div>'+
+ '<div class="notice">'+(id?'Mode EDIT / UPDATE: identitas alat tetap menggunakan data yang sama. Untuk pemeriksaan berkala, isi bagian Pemeriksaan berikutnya yang masih kosong; riwayat sebelumnya tetap dipertahankan.':'Formulir disusun mengikuti kolom workbook monitoring PT Kruing Lestari Jaya. Untuk alat baru, isi jenis pemeriksaan AWAL.')+'</div>'+
  '<div class="toolbar form-top-actions"><button type="button" class="l" onclick="backToDashboard()">← Kembali ke Dashboard</button></div><form id="monitorForm" onsubmit="saveForm(event)"><div class="form-section"><h3>Identitas & Lokasi</h3><div class="formgrid">'+
  '<div class="field"><label>Estate / Lokasi</label><select name="loc" required><option value="">Pilih Estate / Lokasi</option>'+[...new Set(['SPKE','SBAE','SPLE','SPIE','SPKM','SPKW','MLKB',...(x.loc?[x.loc]:[])])].map(v=>'<option value="'+escv(v)+'" '+(x.loc===v?'selected':'')+'>'+escv(v)+'</option>').join('')+'</select></div>'+
  '<div class="field"><label>'+(isRiksa?'Kategori Peralatan':'Uraian / Jenis Lisensi')+'</label><select name="cat" required>'+opts.map(o=>'<option '+(x.cat===o?'selected':'')+'>'+o+'</option>').join('')+'</select></div>'+
