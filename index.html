@@ -485,7 +485,7 @@ body,body *{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important}
 #login .loginform input::placeholder{font-weight:700!important;color:#183746!important}
 #login .loginform button,
 #login .loginform .p{font-weight:900!important;letter-spacing:.25px!important}
-</style><style>
+.history-input-row{border:1px solid var(--line);border-radius:12px;margin:10px 0;background:#fff;overflow:hidden}.history-row-title{cursor:pointer;list-style:none;padding:14px 16px;font-weight:700;color:var(--n);display:flex;align-items:center;justify-content:space-between}.history-row-title::-webkit-details-marker{display:none}.history-row-title:after{content:'＋';font-weight:bold;color:var(--b)}details[open]>.history-row-title:after{content:'−'}.history-row-body{padding:0 15px 12px}.history-input-row[open]{border-color:var(--b)}</style><style>
 /* v1.15 — final login layout: full poster, centered-lower glass panel, strong typography */
 @media(max-width:760px){
   #login.login{
@@ -984,11 +984,11 @@ function form(id){
  const count=isRiksa?(x.cat==='Alat Berat'?4:5):0;
  const historyRows=isRiksa?Array.from({length:Math.max(count,hist.length,1)},(_,i)=>{
   const h=hist[i]||{};
-  return '<div class="history-input-row"><div class="history-row-title">Pemeriksaan Ke-'+(i+1)+'</div>'+
+  return '<details class="history-input-row" '+(i===0?'open':'')+'><summary class="history-row-title">Pemeriksaan Ke-'+(i+1)+(h.date?' · '+escv(h.date):'')+'</summary><div class="history-row-body">'+
    '<div class="field"><label>Nomor Riksa Uji</label><input name="histNo[]" value="'+escv(h.no)+'" placeholder="Nomor sertifikat / riksa uji"></div>'+
    '<div class="field"><label>Tanggal Riksa Uji</label><input type="date" name="histDate[]" value="'+escv(h.date)+'"></div>'+
    '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="histDue[]" value="'+escv(h.due)+'"></div>'+
-   '<div class="field"><label>Masa Berlaku</label><input name="histValidity[]" value="'+escv(h.validity)+'" placeholder="Contoh: 1 TAHUN"></div></div>';
+   '<div class="field"><label>Masa Berlaku</label><input name="histValidity[]" value="'+escv(h.validity)+'" placeholder="Contoh: 1 TAHUN"></div></div></details>';
  }).join(''):'';
  $('modal').innerHTML='<div class="modal"><div class="box"><div class="eyebrow">KLJ MONITORING / INPUT DATA</div><h2>'+(id?'Ubah':'Tambah')+' Data '+(isRiksa?'Riksa Uji':'SIO / Lisensi K3')+'</h2>'+
  '<div class="notice">Formulir disusun mengikuti kolom workbook monitoring PT Kruing Lestari Jaya. Kolom yang tidak relevan dapat dikosongkan.</div>'+
