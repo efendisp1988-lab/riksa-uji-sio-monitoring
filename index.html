@@ -954,7 +954,7 @@ function render(){
   '<button class="module-card" onclick="goByName(\'sio\')"><span class="module-icon">▣</span><b>SIO & Lisensi K3</b><small>Pemegang lisensi, masa berlaku, dan status kepegawaian</small><strong>Buka modul →</strong></button></div>'+
   '<section class="panel priority-panel"><div class="panel-head"><h3>Prioritas Tindak Lanjut</h3><span class="small">Jatuh tempo terdekat</span></div>'+priority(a)+'</section>';
  } else if(page==='riksa'||page==='sio'){
-  let arr=db[page],cc=cnt(arr),cats=page==='riksa'?['Alat Berat','Mesin Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
+  let arr=db[page],cc=cnt(arr),cats=page==='riksa'?['Alat Berat / Pesawat Angkat dan Angkut','Genset / Pesawat Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
   $('content').innerHTML='<div class="section-label">EHS CONTROL / '+(page==='riksa'?'RIKSA UJI':'KOMPETENSI K3')+'</div><h1 class="title">'+(page==='riksa'?'Monitoring Riksa Uji':'SIO & Lisensi K3')+'</h1><p class="sub">'+(page==='riksa'?'Monitoring kelayakan dan masa berlaku pemeriksaan peralatan.':'Monitoring pemegang sertifikat, kompetensi, dan masa berlaku lisensi.')+'</p>'+
   '<div class="cards">'+metric('Total Data',cc.total,'Data tercatat')+metric('Berlaku',cc.valid,'Masa berlaku aman')+metric('Segera Habis',cc.soon,'Jatuh tempo ≤60 hari')+metric('Kedaluwarsa',cc.expired,'Perlu tindak lanjut')+'</div>'+
   '<div class="category-grid">'+cats.map((cat,i)=>{let n=arr.filter(x=>x.cat===cat).length;return '<button type="button" class="category-card" onclick="selectCategory(\''+cat.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')"><span class="category-icon">'+(page==='riksa'?['🚜','⚙','▤','◉','▦'][i]:'▣')+'</span><div><b>'+cat+'</b><small>'+n+' data terdaftar</small></div><span class="category-arrow">›</span></button>'}).join('')+'</div>'+
@@ -971,7 +971,7 @@ function showHistory(id){let x=db.riksa.find(z=>z.id===id);if(!x)return;let h=(x
 function selectCategory(cat){let q=$('q');if(q){q.value=cat;filter();$('table').scrollIntoView({behavior:'smooth',block:'start'});}}
 function filter(){let q=$('q').value.toLowerCase(),l=$('loc').value,s=$('sf').value;let a=db[page].filter(x=>(!q||[x.name,x.cat,x.loc,x.no].join(' ').toLowerCase().includes(q))&&(!l||x.loc===l)&&(!s||status(x.due)===s));$('table').innerHTML=table(a)}
 function addYears(date,years){if(!date)return'';let d=new Date(date+'T12:00:00');let day=d.getDate();d.setFullYear(d.getFullYear()+Number(years));if(d.getDate()!==day)d.setDate(0);return d.toISOString().slice(0,10)}
-function intervalFor(cat,type){if(cat==='Pesawat Tenaga Produksi'||cat==='Mesin Tenaga Produksi')return 1;if(cat==='Alat Berat')return type==='Awal'?2:1;return 2}
+function intervalFor(cat,type){if(cat==='Pesawat Tenaga Produksi'||cat==='Genset / Pesawat Tenaga Produksi')return 1;if(cat==='Alat Berat / Pesawat Angkat dan Angkut')return type==='Awal'?2:1;return 2}
 function updateDue(){let cat=document.querySelector('[name=cat]')?.value,type=document.querySelector('[name=inspectionType]')?.value,date=document.querySelector('[name=issued]')?.value;let years=intervalFor(cat,type);let due=addYears(date,years);let hint=document.getElementById('periodHint');if(hint)hint.textContent='Interval otomatis: '+years+' tahun. Perkiraan jatuh tempo: '+(due||'-')+'. Tanggal sertifikat tetap menjadi acuan.';let field=document.querySelector('[name=due]');if(field&&date&&!field.dataset.manual)field.value=due}
 function updateHistoryDue(el){const row=el.closest('.history-input-row');if(!row)return;const date=row.querySelector('[name="histDate[]"]')?.value;const period=row.querySelector('[name="histValidity[]"]')?.value;const dueField=row.querySelector('[name="histDue[]"]');const years=parseInt(period,10);if(dueField){dueField.value=(date&&years)?addYears(date,years):'';}const summary=row.querySelector('summary');if(summary){const n=summary.textContent.match(/Pemeriksaan Ke-\\d+/)?.[0]||'Pemeriksaan';summary.childNodes[0].textContent=n+(date?' · '+date:'');}}
 function openInputForm(){try{form();const host=$('modal');if(!host||!host.innerHTML.trim())throw new Error('Kontainer formulir tidak terbentuk');host.style.display='block';host.style.position='fixed';host.style.inset='0';host.style.zIndex='99999';document.body.style.overflow='hidden';const box=host.querySelector('.modal .box');if(box){box.style.maxHeight='90vh';box.style.overflowY='auto';box.style.width='min(720px, calc(100vw - 24px))';}host.scrollTop=0;}catch(err){alert('Form Tambah Data belum dapat dibuka: '+(err?.message||err));}}
@@ -979,10 +979,10 @@ function form(id){
  editId=id||null;
  let x=id?db[page].find(z=>z.id===id):{};
  const isRiksa=page==='riksa';
- const opts=isRiksa?['Alat Berat','Mesin Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
+ const opts=isRiksa?['Alat Berat / Pesawat Angkat dan Angkut','Genset / Pesawat Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
  const escv=v=>esc(v??'');
  const hist=(x.inspections||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
- const count=isRiksa?(x.cat==='Alat Berat'?4:5):0;
+ const count=isRiksa?(x.cat==='Alat Berat / Pesawat Angkat dan Angkut'?4:5):0;
  const historyRows=isRiksa?Array.from({length:Math.max(count,hist.length,1)},(_,i)=>{
   const h=hist[i]||{};
   return '<details class="history-input-row" '+(i===0?'open':'')+'><summary class="history-row-title">Pemeriksaan Ke-'+(i+1)+(h.date?' · '+escv(h.date):'')+'</summary><div class="history-row-body">'+
