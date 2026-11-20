@@ -973,6 +973,7 @@ function filter(){let q=$('q').value.toLowerCase(),l=$('loc').value,s=$('sf').va
 function addYears(date,years){if(!date)return'';let d=new Date(date+'T12:00:00');let day=d.getDate();d.setFullYear(d.getFullYear()+Number(years));if(d.getDate()!==day)d.setDate(0);return d.toISOString().slice(0,10)}
 function intervalFor(cat,type){if(cat==='Pesawat Tenaga Produksi'||cat==='Mesin Tenaga Produksi')return 1;if(cat==='Alat Berat')return type==='Awal'?2:1;return 2}
 function updateDue(){let cat=document.querySelector('[name=cat]')?.value,type=document.querySelector('[name=inspectionType]')?.value,date=document.querySelector('[name=issued]')?.value;let years=intervalFor(cat,type);let due=addYears(date,years);let hint=document.getElementById('periodHint');if(hint)hint.textContent='Interval otomatis: '+years+' tahun. Perkiraan jatuh tempo: '+(due||'-')+'. Tanggal sertifikat tetap menjadi acuan.';let field=document.querySelector('[name=due]');if(field&&date&&!field.dataset.manual)field.value=due}
+function updateHistoryDue(el){const row=el.closest('.history-input-row');if(!row)return;const date=row.querySelector('[name="histDate[]"]')?.value;const period=row.querySelector('[name="histValidity[]"]')?.value;const dueField=row.querySelector('[name="histDue[]"]');const years=parseInt(period,10);if(dueField){dueField.value=(date&&years)?addYears(date,years):'';}const summary=row.querySelector('summary');if(summary){const n=summary.textContent.match(/Pemeriksaan Ke-\\d+/)?.[0]||'Pemeriksaan';summary.childNodes[0].textContent=n+(date?' · '+date:'');}}
 function openInputForm(){try{form();const host=$('modal');if(!host||!host.innerHTML.trim())throw new Error('Kontainer formulir tidak terbentuk');host.style.display='block';host.style.position='fixed';host.style.inset='0';host.style.zIndex='99999';document.body.style.overflow='hidden';const box=host.querySelector('.modal .box');if(box){box.style.maxHeight='90vh';box.style.overflowY='auto';box.style.width='min(720px, calc(100vw - 24px))';}host.scrollTop=0;}catch(err){alert('Form Tambah Data belum dapat dibuka: '+(err?.message||err));}}
 function form(id){
  editId=id||null;
@@ -986,9 +987,9 @@ function form(id){
   const h=hist[i]||{};
   return '<details class="history-input-row" '+(i===0?'open':'')+'><summary class="history-row-title">Pemeriksaan Ke-'+(i+1)+(h.date?' · '+escv(h.date):'')+'</summary><div class="history-row-body">'+
    '<div class="field"><label>Nomor Riksa Uji</label><input name="histNo[]" value="'+escv(h.no)+'" placeholder="Nomor sertifikat / riksa uji"></div>'+
-   '<div class="field"><label>Tanggal Riksa Uji</label><input type="date" name="histDate[]" value="'+escv(h.date)+'"></div>'+
-   '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="histDue[]" value="'+escv(h.due)+'"></div>'+
-   '<div class="field"><label>Masa Berlaku</label><input name="histValidity[]" value="'+escv(h.validity)+'" placeholder="Contoh: 1 TAHUN"></div></div></details>';
+   '<div class="field"><label>Tanggal Riksa Uji</label><input type="date" name="histDate[]" value="'+escv(h.date)+'" onchange="updateHistoryDue(this)"></div>'+
+   '<div class="field"><label>Masa Berlaku</label><select name="histValidity[]" onchange="updateHistoryDue(this)"><option value="">Pilih periode</option>'+[1,2,3,4,5].map(n=>'<option value="'+n+' Tahun" '+(String(h.validity||'').toLowerCase().includes(String(n))?'selected':'')+'>'+n+' Tahun</option>').join('')+'</select></div>'+
+   '<div class="field"><label>Tanggal Jatuh Tempo (otomatis)</label><input type="date" name="histDue[]" value="'+escv(h.due)+'" readonly></div></div></details>';
  }).join(''):'';
  $('modal').innerHTML='<div class="modal"><div class="box"><div class="eyebrow">KLJ MONITORING / INPUT DATA</div><h2>'+(id?'Ubah':'Tambah')+' Data '+(isRiksa?'Riksa Uji':'SIO / Lisensi K3')+'</h2>'+
  '<div class="notice">Formulir disusun mengikuti kolom workbook monitoring PT Kruing Lestari Jaya. Kolom yang tidak relevan dapat dikosongkan.</div>'+
