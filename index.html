@@ -1024,14 +1024,15 @@ function form(id){
  '<div class="field wide"><label>Keterangan</label><textarea name="notes" rows="3">'+escv(x.notes)+'</textarea></div></div></div>'+
  '<div class="toolbar"><button class="p" type="submit">Simpan Data</button><button type="button" class="l" onclick="closeModal()">Batal</button></div></form></div></div>';
 }
+document.addEventListener('input',function(e){const el=e.target;if(!el.closest||!el.closest('#monitorForm'))return;if(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&['text','search','tel'].includes((el.type||'text').toLowerCase()))){const a=el.selectionStart,b=el.selectionEnd;const v=el.value.toLocaleUpperCase('id-ID');if(el.value!==v){el.value=v;try{el.setSelectionRange(a,b)}catch(_){}}}});
 function saveForm(e){
  e.preventDefault();
- const f=new FormData(e.target),o=Object.fromEntries(f.entries());
+ const f=new FormData(e.target),o=Object.fromEntries(f.entries());for(const k of Object.keys(o)){if(typeof o[k]==='string'&&!['issued','due'].includes(k))o[k]=o[k].toLocaleUpperCase('id-ID');}
  o.id=editId||Date.now().toString();o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';
  const i=db[page].findIndex(x=>x.id===o.id),old=i>=0?db[page][i]:null;
  if(page==='riksa'){
   const dates=f.getAll('histDate[]'),dues=f.getAll('histDue[]'),nos=f.getAll('histNo[]'),valids=f.getAll('histValidity[]');
-  const types=f.getAll('histType[]');o.inspections=dates.map((date,j)=>({type:types[j]||'AWAL',date:date||'',due:dues[j]||'',no:nos[j]||'',validity:valids[j]||'',issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
+  const types=f.getAll('histType[]');o.inspections=dates.map((date,j)=>({type:types[j]||'AWAL',date:date||'',due:dues[j]||'',no:(nos[j]||'').toLocaleUpperCase('id-ID'),validity:(valids[j]||'').toLocaleUpperCase('id-ID'),issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
   const latest=o.inspections.filter(h=>h.date||h.due||h.no).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).pop();
   o.issued=latest?.date||'';o.due=latest?.due||'';o.no=latest?.no||'';o.validity=latest?.validity||'';
  } else {
