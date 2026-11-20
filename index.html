@@ -1056,7 +1056,7 @@ function saveForm(e){
  save();closeModal();render();
 }
 function backToDashboard(){if(!confirm('Kembali ke Dashboard Utama? Data formulir yang belum disimpan akan dibatalkan.'))return;closeModal();page='home';document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.getAttribute('onclick')?.includes("'home'")));render();}
-function closeModal(){$('modal').innerHTML='';$('modal').style.display='';document.body.style.overflow=''}function log(action,name,mod){db.history.push({at:new Date().toLocaleString('id-ID'),mod,action,name})}function del(id){let x=db[page].find(z=>z.id===id);if(x&&confirm('Hapus '+x.name+'?')){db[page]=db[page].filter(z=>z.id!==id);log('Hapus',x.name,x.mod);save();render()}}
+function closeModal(){const m=$('modal');m.innerHTML='';m.removeAttribute('style');document.body.style.overflow=''}function log(action,name,mod){db.history.push({at:new Date().toLocaleString('id-ID'),mod,action,name})}function del(id){let x=db[page].find(z=>z.id===id);if(x&&confirm('Hapus '+x.name+'?')){db[page]=db[page].filter(z=>z.id!==id);log('Hapus',x.name,x.mod);save();render()}}
 function exportExcel(){
  const xmlEsc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
  const profile=JSON.parse(localStorage.getItem('klj_company_profile')||'{}');
