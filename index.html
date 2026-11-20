@@ -1078,8 +1078,9 @@ function form(id){
  '<div class="field"><label>Jenis Lisensi</label><input name="licenseType" value="'+escv(x.licenseType)+'" placeholder="SIO Operator Pesawat Angkat dan Angkut"></div>'+
  '<div class="field"><label>Unit Mesin / Alat Berat</label><input name="unit" value="'+escv(x.unit)+'"></div>'+
  '<div class="field"><label>Nomor Perizinan / Registrasi</label><input name="no" value="'+escv(x.no)+'"></div>'+
- '<div class="field"><label>Masa Berlaku (sesuai dokumen)</label><input name="validity" value="'+escv(x.validity)+'" placeholder="Contoh: 5 Tahun (s/d 01 Maret 2029)"></div>'+
- '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="due" value="'+escv(x.due)+'"></div>'+
+ '<div class="field"><label>Masa Berlaku (sesuai dokumen)</label><input name="validity" value="'+escv(x.validity)+'" placeholder="Contoh: 5 Tahun" oninput="updateSioIssued(this.form)"></div>'+
+ '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="due" value="'+escv(x.due)+'" onchange="updateSioIssued(this.form)" oninput="updateSioIssued(this.form)"></div>'+
+ '<div class="field"><label>Tanggal Terbit SIO (otomatis)</label><input type="date" name="issued" value="'+escv(x.issued)+'" readonly></div>'+
  '<div class="field"><label>Status Kepegawaian</label><select name="employment"><option '+(x.employment!=='RESIGN'?'selected':'')+'>AKTIF</option><option '+(x.employment==='RESIGN'?'selected':'')+'>RESIGN</option><option '+(x.employment==='BELUM TRAINING'?'selected':'')+'>BELUM TRAINING</option></select></div>'
  )+
  '</div></div>'+
@@ -1090,6 +1091,21 @@ function form(id){
  (!isRiksa?'<div class="field"><label>Ketaatan Peraturan</label><input name="compliance" value="'+escv(x.compliance)+'"></div>':'')+
  '<div class="field wide"><label>Keterangan</label><textarea name="notes" rows="3">'+escv(x.notes)+'</textarea></div></div></div>'+
  '<div class="toolbar"><button class="p" type="submit">Simpan Data</button><button type="button" class="l" onclick="closeModal()">Batal</button></div></form></div></div>';
+}
+function updateSioIssued(form){
+ if(!form)return;
+ const validity=form.elements.namedItem('validity')?.value||'';
+ const due=form.elements.namedItem('due')?.value||'';
+ const issued=form.elements.namedItem('issued');
+ if(!issued)return;
+ const m=validity.match(/(\d+)\s*(?:TAHUN|THN|YEAR)/i);
+ if(!m||!due){issued.value='';return;}
+ const years=parseInt(m[1],10),d=new Date(due+'T12:00:00');
+ if(!Number.isFinite(years)||!Number.isFinite(d.getTime())){issued.value='';return;}
+ const month=d.getMonth(),day=d.getDate();
+ d.setFullYear(d.getFullYear()-years);
+ if(d.getMonth()!==month)d.setDate(0);
+ issued.value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 }
 document.addEventListener('input',function(e){const el=e.target;if(!el.closest||!el.closest('#monitorForm'))return;if(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&['text','search','tel'].includes((el.type||'text').toLowerCase()))){const a=el.selectionStart,b=el.selectionEnd;const v=el.value.toLocaleUpperCase('id-ID');if(el.value!==v){el.value=v;try{el.setSelectionRange(a,b)}catch(_){}}}});
 function saveForm(e){
@@ -1106,7 +1122,7 @@ function saveForm(e){
   const latest=o.inspections.filter(h=>h.date||h.due||h.no).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).pop();
   o.issued=latest?.date||'';o.due=latest?.due||'';o.no=latest?.no||'';o.validity=latest?.validity||'';
  } else {
-  o.issued=old?.issued||'';
+  o.issued=o.issued||old?.issued||'';
   o.inspections=old?.inspections||[];
  }
  if(i>=0){db[page][i]={...old,...o};log('Ubah',o.name,o.mod)}
