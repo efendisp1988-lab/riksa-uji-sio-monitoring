@@ -1063,7 +1063,7 @@ function form(id){
  '<div class="notice">'+(id?'Mode EDIT / UPDATE: identitas alat tetap menggunakan data yang sama. Untuk pemeriksaan berkala, isi bagian Pemeriksaan berikutnya yang masih kosong; riwayat sebelumnya tetap dipertahankan.':'Formulir disusun mengikuti kolom workbook monitoring PT Kruing Lestari Jaya. Untuk alat baru, isi jenis pemeriksaan AWAL.')+'</div>'+
  '<div class="toolbar form-top-actions"><button type="button" class="l" onclick="backToDashboard()">← Kembali ke Dashboard</button></div><form id="monitorForm" onsubmit="saveForm(event)"><div class="form-section"><h3>Identitas & Lokasi</h3><div class="formgrid">'+
  '<div class="field"><label>Estate / Lokasi</label><select name="loc" required><option value="">Pilih Estate / Lokasi</option>'+[...new Set(['SPKE','SBAE','SPLE','SPIE','SPKM','SPKW','MLKB',...(x.loc?[x.loc]:[])])].map(v=>'<option value="'+escv(v)+'" '+(x.loc===v?'selected':'')+'>'+escv(v)+'</option>').join('')+'</select></div>'+
- '<div class="field"><label>'+(isRiksa?'Kategori Peralatan':'Uraian / Jenis Lisensi')+'</label><select name="cat" required>'+opts.map(o=>'<option value="'+escv(o)+'" '+(String(x.cat||'').toLocaleUpperCase('id-ID')===o.toLocaleUpperCase('id-ID')?'selected':'')+'>'+escv(o.toLocaleUpperCase('id-ID'))+'</option>').join('')+'</select></div>'+
+ '<div class="field"><label>'+(isRiksa?'Kategori Peralatan':'Uraian / Jenis Lisensi')+'</label><select name="cat" required '+(!isRiksa?'onchange="updateLicenseTypeLabel(this.form)"':'')+'>'+opts.map(o=>'<option value="'+escv(o)+'" '+(String(x.cat||'').toLocaleUpperCase('id-ID')===o.toLocaleUpperCase('id-ID')?'selected':'')+'>'+(o==='Lisensi K3 Lainnya'?'LISENSI LAINNYA':escv(o.toLocaleUpperCase('id-ID')))+'</option>').join('')+'</select></div>'+
  (isRiksa?
  '<div class="field"><label>Uraian</label><input name="name" required value="'+escv(x.name)+'" placeholder="Contoh: GENSET / TRAKTOR MINI"></div>'+
  '<div class="field"><label>Nomor IO</label><input name="io" value="'+escv(x.io)+'"></div>'+
@@ -1075,7 +1075,7 @@ function form(id){
  '<div class="field"><label>Status Peralatan</label><select name="equipmentStatus"><option '+(x.equipmentStatus==='AKTIF'?'selected':'')+'>AKTIF</option><option '+(x.equipmentStatus==='TDK AKTIF'?'selected':'')+'>TDK AKTIF</option><option '+(x.equipmentStatus==='BREAKDOWN'?'selected':'')+'>BREAKDOWN</option></select></div>'
  :
  '<div class="field"><label>Nama Pemegang Lisensi</label><input name="name" required value="'+escv(x.name)+'"></div>'+
- '<div class="field"><label>Jenis Lisensi</label><input name="licenseType" value="'+escv(x.licenseType)+'" placeholder="SIO Operator Pesawat Angkat dan Angkut"></div>'+
+ '<div class="field"><label id="licenseTypeLabel">Jenis Lisensi'+(x.cat==='Lisensi K3 Lainnya'?' (Input Manual)':'')+'</label><input name="licenseType" value="'+escv(x.licenseType)+'" placeholder="'+(x.cat==='Lisensi K3 Lainnya'?'Ketik nama lisensi lainnya':'Contoh: SIO Operator Pesawat Angkat dan Angkut')+'"></div>'+
  '<div class="field"><label>Unit Mesin / Alat Berat</label><input name="unit" value="'+escv(x.unit)+'"></div>'+
  '<div class="field"><label>Nomor Perizinan / Registrasi</label><input name="no" value="'+escv(x.no)+'"></div>'+
  '<div class="field"><label>Masa Berlaku (sesuai dokumen)</label><input name="validity" value="'+escv(x.validity)+'" placeholder="Contoh: 5 Tahun" oninput="updateSioIssued(this.form)"></div>'+
@@ -1091,6 +1091,15 @@ function form(id){
  (!isRiksa?'<div class="field"><label>Ketaatan Peraturan</label><input name="compliance" value="'+escv(x.compliance)+'"></div>':'')+
  '<div class="field wide"><label>Keterangan</label><textarea name="notes" rows="3">'+escv(x.notes)+'</textarea></div></div></div>'+
  '<div class="toolbar"><button class="p" type="submit">Simpan Data</button><button type="button" class="l" onclick="closeModal()">Batal</button></div></form></div></div>';
+}
+function updateLicenseTypeLabel(form){
+ if(!form)return;
+ const cat=form.elements.namedItem('cat')?.value||'';
+ const label=form.querySelector('#licenseTypeLabel');
+ const input=form.elements.namedItem('licenseType');
+ const other=cat==='Lisensi K3 Lainnya';
+ if(label)label.textContent=other?'Nama Lisensi Lainnya (Input Manual)':'Jenis Lisensi';
+ if(input)input.placeholder=other?'Ketik nama lisensi lainnya, contoh: Ahli K3 Umum':'Contoh: SIO Operator Pesawat Angkat dan Angkut';
 }
 function updateSioIssued(form){
  if(!form)return;
