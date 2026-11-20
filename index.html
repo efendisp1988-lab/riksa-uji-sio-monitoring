@@ -187,6 +187,47 @@ body,body *{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important}
  .loginform .p{height:38px!important}
  .loginform .small{font-size:7.5px!important;margin-top:7px!important}
 }
+
+/* v1.4 — intentional poster-first composition; login is a compact lower dock */
+@media(max-width:760px){
+ .login{position:relative!important;display:block!important;width:100%!important;height:100svh!important;min-height:100svh!important;max-height:100svh!important;padding:0!important;overflow:hidden!important;background:#082c35!important}
+ .login:before{inset:0!important;background-image:url("./KLJ-EHS-Login-Visual.png")!important;background-repeat:no-repeat!important;background-position:center top!important;background-size:100% auto!important;opacity:1!important}
+ .login:after{display:none!important}
+ .loginlayout{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;max-width:none!important;display:block!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}
+ .loginvisual{position:absolute!important;inset:0!important;min-height:0!important;padding:0!important;background:transparent!important;pointer-events:none!important}
+ .loginbrand,.visualcopy,.visualfoot,.loginart{display:none!important}
+ .loginform{position:absolute!important;left:50%!important;right:auto!important;bottom:max(14px,env(safe-area-inset-bottom))!important;top:auto!important;transform:translateX(-50%)!important;width:calc(100% - 54px)!important;max-width:410px!important;max-height:none!important;overflow:visible!important;padding:14px 17px 12px!important;border-radius:16px!important;background:rgba(244,249,247,.88)!important;border:1px solid rgba(255,255,255,.9)!important;box-shadow:0 12px 34px rgba(0,20,28,.25)!important;backdrop-filter:blur(12px) saturate(125%)!important}
+ .formtop{display:flex!important;align-items:center!important;gap:9px!important;font-size:8px!important;letter-spacing:1.3px!important;margin:0 0 7px!important}
+ .formicon{width:23px!important;height:23px!important;font-size:13px!important}
+ .loginform h1{font-size:20px!important;line-height:1.15!important;margin:0 0 3px!important}
+ .loginform .muted{font-size:9px!important;line-height:1.3!important;margin:0 0 8px!important}
+ .loginform .field{margin:0 0 7px!important;gap:4px!important}
+ .loginform .field label{font-size:7px!important;letter-spacing:1.1px!important}
+ .loginform .field input{height:34px!important;padding:0 11px!important;font-size:11px!important;border-radius:7px!important}
+ .loginform .p{height:37px!important;padding:0 13px!important;font-size:10px!important;border-radius:7px!important}
+ .loginform .p span{font-size:15px!important}
+ .loginform .small{font-size:7px!important;line-height:1.25!important;margin:6px 0 0!important}
+ .formbottom{display:none!important}
+}
+@media(max-width:760px) and (max-height:740px){
+ .login:before{background-size:auto 56svh!important}
+ .loginform{padding:11px 15px 10px!important;bottom:max(9px,env(safe-area-inset-bottom))!important}
+ .formtop{margin-bottom:5px!important}
+ .loginform h1{font-size:18px!important}
+ .loginform .muted{margin-bottom:6px!important}
+ .loginform .field{margin-bottom:5px!important}
+ .loginform .field input{height:31px!important}
+ .loginform .p{height:34px!important}
+ .loginform .small{font-size:6.5px!important;margin-top:5px!important}
+}
+@media(min-width:761px){
+ .login{background:#082c35!important}
+ .login:before{background-image:linear-gradient(90deg,rgba(3,22,30,.18),rgba(3,22,30,.12)),url("./KLJ-EHS-Login-Visual.png")!important;background-repeat:no-repeat!important;background-position:center!important;background-size:cover!important}
+ .loginlayout{width:min(1180px,calc(100% - 60px))!important;min-height:0!important;height:min(760px,calc(100vh - 60px))!important;grid-template-columns:1fr 390px!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+ .loginvisual{background:transparent!important;min-height:0!important}
+ .loginbrand,.visualcopy,.visualfoot,.loginart{display:none!important}
+ .loginform{align-self:center!important;padding:28px 26px!important;border-radius:18px!important;background:rgba(246,250,248,.88)!important;border:1px solid #ffffffbd!important;box-shadow:0 22px 60px #001b2a66!important;backdrop-filter:blur(18px)!important}
+}
 </style></head><body>
 <section id="login" class="login"><div class="loginlayout"><div class="loginvisual"><div class="loginbrand"><span class="brandmark">KLJ</span><span>PT KRUING LESTARI JAYA<small>OPERATIONAL ASSURANCE PLATFORM</small></span></div><div class="visualcopy"><div class="visualtag">EQUIPMENT · INSPECTION · COMPETENCY</div><h2>Reliability starts<br>with <em>readiness.</em></h2><p>Satu pusat kendali untuk memastikan peralatan laik operasi dan kompetensi K3 selalu terpantau.</p></div><svg class="loginart" viewBox="0 0 720 330" role="img" aria-label="Ilustrasi perkebunan kelapa sawit dan fasilitas pabrik"><defs><linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#8ab8b4"/><stop offset="1" stop-color="#d5c99c"/></linearGradient><linearGradient id="mill" x2="0" y2="1"><stop stop-color="#f2f5f2"/><stop offset="1" stop-color="#b8c9c6"/></linearGradient></defs><circle cx="575" cy="70" r="37" fill="#e9c878" opacity=".9"/><path d="M0 205Q120 145 240 190T480 175T720 185V330H0Z" fill="url(#horizon)" opacity=".6"/><path d="M0 230Q130 180 255 222T510 207T720 220V330H0Z" fill="#397b67"/><path d="M0 265Q150 210 300 260T720 250V330H0Z" fill="#205849"/><g fill="#174b43"><path d="M90 254l15-145 13 145z"/><path d="M105 116Q39 80 34 34q53 7 71 82M106 116Q90 45 130 5q34 56-24 111M108 116q53-70 104-53-29 57-104 53M106 116Q33 116 4 164q69 17 102-48"/></g><g fill="#25624e"><path d="M198 268l12-114 11 114z"/><path d="M210 160q-52-27-53-64 41 3 53 64M211 160q-1-62 32-86 23 43-32 86M211 160q50-48 86-31-22 39-86 31"/></g><g transform="translate(340 125)"><rect x="0" y="70" width="270" height="105" rx="5" fill="url(#mill)"/><rect x="28" y="18" width="86" height="157" rx="3" fill="#e9efed"/><rect x="42" y="0" width="58" height="22" fill="#d8e1df"/><rect x="138" y="98" width="102" height="77" fill="#9fb8b7"/><rect x="150" y="110" width="78" height="65" fill="#426c70"/><path d="M-6 70h284" stroke="#d9ae57" stroke-width="8"/><path d="M25 46h91M25 58h91" stroke="#a8b9b5" stroke-width="4"/><rect x="253" y="92" width="22" height="10" fill="#d8ae57"/><path d="M42 175v22m202-22v22" stroke="#183c45" stroke-width="8"/></g><path d="M0 298H720" stroke="#c9b26f" stroke-width="3" opacity=".7"/></svg><div class="visualfoot"><span>●</span> INTEGRATED MONITORING <b>01 / 03</b></div></div><div class="loginform"><div class="formtop"><span class="formicon">↗</span><span>ADMINISTRATOR ACCESS</span></div><h1>Selamat datang</h1><p class="muted">Masuk ke ruang kendali monitoring perusahaan.</p><div id="setup" class="hidden"><p class="small">Buat Admin lokal pertama kali pada browser ini.</p><div class="field"><label>USERNAME ADMIN</label><input id="nu" autocomplete="username"></div><div class="field"><label>PASSWORD · MIN. 8 KARAKTER</label><input id="np" type="password"></div><button class="p" onclick="createAdmin()">Buat Admin <span>→</span></button></div><div id="signin"><div class="field"><label>USERNAME</label><input id="u" autocomplete="username" placeholder="Masukkan username"></div><div class="field"><label>PASSWORD</label><input id="pw" type="password" autocomplete="current-password" placeholder="Masukkan password"></div><button class="p" onclick="loginNow()">Masuk ke Sistem <span>→</span></button></div><p id="msg" class="small">Akses terbatas untuk Administrator. Versi final menggunakan penyimpanan lokal dan dapat dijalankan tanpa internet.</p><div class="formbottom"><span>KLJ · HSE CONTROL CENTER</span><span>SECURE LOCAL ACCESS</span></div></div></div></section>
 <div id="app" class="hidden"><aside class="side"><div class="brand">KLJ MONITORING<small>Riksa Uji & SIO Control Center</small></div><button class="nav active" data-s="UT" onclick="go('home',this)">▦ Dashboard Utama</button><button class="nav" data-s="RU" onclick="go('riksa',this)">◈ Monitoring Riksa Uji</button><button class="nav" data-s="SIO" onclick="go('sio',this)">◎ SIO & Lisensi K3</button><button class="nav" data-s="RH" onclick="go('history',this)">↺ Riwayat Perubahan</button><button class="nav" data-s="BK" onclick="backup()">⇩ Backup Data</button><button class="nav" data-s="RS" onclick="restore()">⇧ Restore Data</button></aside><div class="main"><header class="top"><b id="top">Dashboard Utama</b><button class="l" onclick="logout()">Keluar</button></header><main class="wrap"><div id="content"></div></main></div></div><div id="modal"></div>
