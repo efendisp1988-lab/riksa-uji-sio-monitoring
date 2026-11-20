@@ -1050,7 +1050,7 @@ function form(id){
  editId=id||null;
  let x=id?db[page].find(z=>z.id===id):{};
  const isRiksa=page==='riksa';
- const opts=isRiksa?['Alat Berat / Pesawat Angkat dan Angkut','Genset / Pesawat Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','Lisensi K3 Lainnya'];
+ const opts=isRiksa?['Alat Berat / Pesawat Angkat dan Angkut','Genset / Pesawat Tenaga Produksi','Pesawat Uap / Boiler','Tangki Timbun','Bejana Tekan']:['SIO Pesawat Angkat dan Angkut','SIO Pesawat Tenaga dan Produksi','SIO Pesawat Uap Kelas 1','SIO Pesawat Uap Kelas 2','Lisensi K3 Lainnya'];
  const escv=v=>esc(v??'');
  const hist=(x.inspections||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
  const historyRows=isRiksa&&!id?'<div class="history-input-row"><div class="history-row-body">'+
