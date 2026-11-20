@@ -1078,7 +1078,7 @@ function form(id){
  '<div class="field"><label id="licenseTypeLabel">Jenis Lisensi'+(x.cat==='Lisensi K3 Lainnya'?' (Input Manual)':'')+'</label><input name="licenseType" value="'+escv(x.licenseType)+'" placeholder="'+(x.cat==='Lisensi K3 Lainnya'?'Ketik nama lisensi lainnya':'Contoh: SIO Operator Pesawat Angkat dan Angkut')+'"></div>'+
  '<div class="field"><label>Unit Mesin / Alat Berat</label><input name="unit" value="'+escv(x.unit)+'"></div>'+
  '<div class="field"><label>Nomor Perizinan / Registrasi</label><input name="no" value="'+escv(x.no)+'"></div>'+
- '<div class="field"><label>Masa Berlaku (sesuai dokumen)</label><input name="validity" value="'+escv(x.validity)+'" placeholder="Contoh: 5 Tahun" oninput="updateSioIssued(this.form)"></div>'+
+ '<div class="field"><label>Masa Berlaku (sesuai dokumen)</label><select name="validity" required onchange="updateSioIssued(this.form)"><option value="">Pilih masa berlaku</option>'+['1 Tahun','2 Tahun','3 Tahun','4 Tahun','5 Tahun','Selamanya'].map(v=>'<option value="'+v+'" '+(String(x.validity||'').toUpperCase()===v.toUpperCase()?'selected':'')+'>'+v.toUpperCase()+'</option>').join('')+'</select></div>'+
  '<div class="field"><label>Tanggal Jatuh Tempo</label><input type="date" name="due" value="'+escv(x.due)+'" onchange="updateSioIssued(this.form)" oninput="updateSioIssued(this.form)"></div>'+
  '<div class="field"><label>Tanggal Terbit SIO (otomatis)</label><input type="date" name="issued" value="'+escv(x.issued)+'" readonly></div>'+
  '<div class="field"><label>Status Kepegawaian</label><select name="employment"><option '+(x.employment!=='RESIGN'?'selected':'')+'>AKTIF</option><option '+(x.employment==='RESIGN'?'selected':'')+'>RESIGN</option><option '+(x.employment==='BELUM TRAINING'?'selected':'')+'>BELUM TRAINING</option></select></div>'
@@ -1107,8 +1107,10 @@ function updateSioIssued(form){
  const due=form.elements.namedItem('due')?.value||'';
  const issued=form.elements.namedItem('issued');
  if(!issued)return;
+ if(!due||!validity){issued.value='';return;}
+ if(validity.trim().toUpperCase()==='SELAMANYA'){issued.value='';return;}
  const m=validity.match(/(\d+)\s*(?:TAHUN|THN|YEAR)/i);
- if(!m||!due){issued.value='';return;}
+ if(!m){issued.value='';return;}
  const years=parseInt(m[1],10),d=new Date(due+'T12:00:00');
  if(!Number.isFinite(years)||!Number.isFinite(d.getTime())){issued.value='';return;}
  const month=d.getMonth(),day=d.getDate();
