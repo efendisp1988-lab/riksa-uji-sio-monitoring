@@ -999,6 +999,14 @@ th{background:#102b46!important;color:#fff!important}
 <div id="app" class="hidden"><aside class="side"><div class="brand">KLJ MONITORING<small>Riksa Uji & SIO Control Center</small></div><button class="nav active" data-s="UT" onclick="go('home',this)">▦ Dashboard Utama</button><button class="nav" data-s="RU" onclick="go('riksa',this)">◈ Monitoring Riksa Uji</button><button class="nav" data-s="SIO" onclick="go('sio',this)">◎ SIO & Lisensi K3</button><button class="nav" data-s="RH" onclick="go('history',this)">↺ Riwayat Perubahan</button><button class="nav" data-s="BK" onclick="backup()">⇩ Backup Data</button><button class="nav" data-s="RS" onclick="restore()">⇧ Restore Data</button><button class="nav" data-s="PF" onclick="companyProfile()">⚙ Profil Perusahaan</button></aside><div class="main"><header class="top"><b id="top">Dashboard Utama</b><button class="l" onclick="logout()">Keluar</button></header><main class="wrap"><div id="content"></div></main></div></div><div id="modal"></div>
 <script>
 const KEY='klj_monitoring_v04',AUTH='klj_admin_v04';const $=x=>document.getElementById(x);let db={riksa:[],sio:[],history:[]},page='home',editId=null;try{const raw=localStorage.getItem(KEY);if(raw){const parsed=JSON.parse(raw);if(parsed&&Array.isArray(parsed.riksa)&&Array.isArray(parsed.sio)){db={riksa:parsed.riksa,sio:parsed.sio,history:Array.isArray(parsed.history)?parsed.history:[]}}else{localStorage.setItem(KEY+'_recovery_'+Date.now(),raw)}}}catch(e){try{const raw=localStorage.getItem(KEY);if(raw)localStorage.setItem(KEY+'_recovery_'+Date.now(),raw)}catch(ignore){}}
+(function normalizeStoredValidity(){
+ let changed=false;
+ ['riksa','sio'].forEach(mod=>(db[mod]||[]).forEach(x=>{
+  if(x.validity){const v=normalizeValidity(x.validity);if(v!==x.validity){x.validity=v;changed=true}}
+  (x.inspections||[]).forEach(h=>{if(h.validity){const v=normalizeValidity(h.validity);if(v!==h.validity){h.validity=v;changed=true}}});
+ }));
+ if(changed){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+})();
 function init(){try{if(!localStorage.getItem(AUTH)){$('setup').classList.remove('hidden');$('signin').classList.add('hidden')}}catch(e){$('msg').textContent='Penyimpanan browser bermasalah.'}}function recoverAdmin(){if(!confirm('Reset akun Admin saja? Data Riksa Uji, SIO, dan riwayat tidak dihapus.'))return;localStorage.removeItem(AUTH);$('signin').classList.add('hidden');$('setup').classList.remove('hidden');$('nu').value='';$('np').value='';$('msg').textContent='Buat kembali username dan password Admin. Data monitoring tetap tersimpan.'}function showAccountSetup(){if(localStorage.getItem(AUTH)){alert('Akun Administrator sudah terdaftar. Sistem ini menggunakan satu akun Admin saja. Silakan masuk menggunakan akun yang sudah dibuat.');return}$('signin').classList.add('hidden');$('setup').classList.remove('hidden');$('msg').textContent='Buat akun Administrator pertama untuk mulai menggunakan sistem.'}function createAdmin(){if(localStorage.getItem(AUTH)){alert('Akun Administrator sudah ada. Pembuatan akun baru dinonaktifkan agar sistem tetap menggunakan satu Admin.');return}let u=$('nu').value.trim(),p=$('np').value;if(!u||p.length<8)return alert('Password minimal 8 karakter.');localStorage.setItem(AUTH,JSON.stringify({u,p}));$('setup').classList.add('hidden');$('signin').classList.remove('hidden');$('msg').textContent='Akun Admin berhasil dibuat. Silakan masuk.'}function loginNow(){let a=null;try{a=JSON.parse(localStorage.getItem(AUTH)||'null')}catch(e){$('msg').textContent='Data akun rusak. Gunakan Pulihkan Akses Admin.';return}if(a&&a.u===$('u').value.trim()&&a.p===$('pw').value){$('login').classList.add('hidden');$('login').style.display='none';$('app').classList.remove('hidden');$('app').style.display='block';document.body.classList.add('app-open');render()}else $('msg').textContent='Username atau password salah.'}function logout(){$('app').classList.add('hidden');$('app').style.display='none';$('login').classList.remove('hidden');$('login').style.display='grid';document.body.classList.remove('app-open')}function go(p,b){page=p;document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()}function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function status(d){if(!d)return'Belum diisi';let n=Math.ceil((new Date(d+'T23:59:59')-new Date())/86400000);return n<0?'Kedaluwarsa':n<=30?'≤30 Hari':n<=60?'≤60 Hari':'Berlaku'}function badge(s){return '<span class="badge '+(s==='Berlaku'?'valid':s==='Kedaluwarsa'?'expired':s.includes('Hari')?'soon':'')+'">'+s+'</span>'}function cnt(a){return{total:a.length,valid:a.filter(x=>status(x.due)==='Berlaku').length,soon:a.filter(x=>['≤30 Hari','≤60 Hari'].includes(status(x.due))).length,expired:a.filter(x=>status(x.due)==='Kedaluwarsa').length}}
 function metric(t,n,d){return '<div class="card"><span>'+t+'</span><b>'+n+'</b><small class="muted">'+d+'</small></div>'}function bar(t,n,total){return '<div class="barrow"><span>'+t+'</span><div class="bar"><i style="width:'+(total?Math.round(n/total*100):0)+'%"></i></div><b>'+n+'</b></div>'}
@@ -1045,7 +1053,7 @@ function updateInspection(id){
 }
 function saveInspectionUpdate(e,id){
  e.preventDefault();const x=db.riksa.find(z=>z.id===id);if(!x)return;const f=new FormData(e.target);
- const rec={type:f.get('type')||'BERKALA',no:(f.get('no')||'').toLocaleUpperCase('id-ID'),date:f.get('date')||'',validity:f.get('validity')||'',due:f.get('due')||'',issuer:(f.get('issuer')||x.issuer||'').toLocaleUpperCase('id-ID'),notes:(f.get('notes')||'').toLocaleUpperCase('id-ID')};
+ const rec={type:f.get('type')||'BERKALA',no:(f.get('no')||'').toLocaleUpperCase('id-ID'),date:f.get('date')||'',validity:normalizeValidity(f.get('validity')||''),due:f.get('due')||'',issuer:(f.get('issuer')||x.issuer||'').toLocaleUpperCase('id-ID'),notes:(f.get('notes')||'').toLocaleUpperCase('id-ID')};
  if(!rec.date||!rec.validity||!rec.due)return alert('Lengkapi tanggal pemeriksaan dan masa berlaku.');
  x.inspections=x.inspections||[];x.inspections.push(rec);x.inspections.sort((a,b)=>(a.date||'').localeCompare(b.date||''));const latest=x.inspections[x.inspections.length-1];x.issued=latest.date;x.due=latest.due;x.no=latest.no;x.validity=latest.validity;if(rec.issuer)x.issuer=rec.issuer;if(rec.notes)x.notes=rec.notes;
  log('Update Pemeriksaan',x.name,'Riksa Uji');save();closeModal();render();
@@ -1131,15 +1139,16 @@ function updateSioIssued(form){
  issued.value=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 }
 document.addEventListener('input',function(e){const el=e.target;if(!el.closest||!el.closest('#monitorForm'))return;if(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&['text','search','tel'].includes((el.type||'text').toLowerCase()))){const a=el.selectionStart,b=el.selectionEnd;const v=el.value.toLocaleUpperCase('id-ID');if(el.value!==v){el.value=v;try{el.setSelectionRange(a,b)}catch(_){}}}});
+function normalizeValidity(value){return String(value??'').trim().replace(/\\s+/g,' ').toLocaleUpperCase('id-ID');}
 function saveForm(e){
  e.preventDefault();
- const f=new FormData(e.target),o=Object.fromEntries(f.entries());for(const k of Object.keys(o)){if(typeof o[k]==='string'&&!['issued','due','cat'].includes(k))o[k]=o[k].toLocaleUpperCase('id-ID');}
+ const f=new FormData(e.target),o=Object.fromEntries(f.entries());for(const k of Object.keys(o)){if(typeof o[k]==='string'&&!['issued','due','cat'].includes(k))o[k]=o[k].toLocaleUpperCase('id-ID');}if(o.validity)o.validity=normalizeValidity(o.validity);
  o.id=editId||Date.now().toString();o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';
  const i=db[page].findIndex(x=>x.id===o.id),old=i>=0?db[page][i]:null;
  if(page==='riksa'){
   if(f.has('histDate[]')){
    const dates=f.getAll('histDate[]'),dues=f.getAll('histDue[]'),nos=f.getAll('histNo[]'),valids=f.getAll('histValidity[]'),types=f.getAll('histType[]');
-   const added=dates.map((date,j)=>({type:types[j]||'AWAL',date:date||'',due:dues[j]||'',no:(nos[j]||'').toLocaleUpperCase('id-ID'),validity:(valids[j]||'').toLocaleUpperCase('id-ID'),issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
+   const added=dates.map((date,j)=>({type:types[j]||'AWAL',date:date||'',due:dues[j]||'',no:(nos[j]||'').toLocaleUpperCase('id-ID'),validity:normalizeValidity(valids[j]||''),issuer:o.issuer||''})).filter(h=>h.date||h.due||h.no||h.validity);
    o.inspections=old?.inspections||added;
   }else{o.inspections=old?.inspections||[];}
   const latest=o.inspections.filter(h=>h.date||h.due||h.no).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).pop();
@@ -1231,7 +1240,7 @@ function importExcelTemplate(){
     const schema=importTemplateSchema(),headerIndex=rows.findIndex(row=>schema.every(x=>row.includes(x[1])));
     if(headerIndex<0)throw Error('Header tidak sesuai template modul ini. Unduh template terbaru dari aplikasi.');
     const header=rows[headerIndex],records=rows.slice(headerIndex+1).filter(row=>row.some(v=>v&&v.trim())).map(row=>{
-     const o={};schema.forEach(([key,label])=>{const idx=header.indexOf(label);o[key]=(row[idx]||'').trim()});
+     const o={};schema.forEach(([key,label])=>{const idx=header.indexOf(label);o[key]=(row[idx]||'').trim();if(key==='validity')o[key]=normalizeValidity(o[key])});
      if(o.due&&/^\d{4}-\d{2}-\d{2}$/.test(o.due)===false)o.due='';
      if(o.issued&&/^\d{4}-\d{2}-\d{2}$/.test(o.issued)===false)o.issued='';
      if(page==='sio'&&o.validity&&o.due&&!o.issued&&o.validity.toUpperCase()!=='SELAMANYA'){const m=o.validity.match(/(\d+)/);if(m){const d=new Date(o.due+'T12:00:00');d.setFullYear(d.getFullYear()-Number(m[1]));o.issued=d.toISOString().slice(0,10)}}
