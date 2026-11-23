@@ -1028,7 +1028,7 @@ function render(){
   $('content').innerHTML='<div class="section-label">EHS CONTROL / '+(page==='riksa'?'RIKSA UJI':'KOMPETENSI K3')+'</div><h1 class="title">'+(page==='riksa'?'Monitoring Riksa Uji':'SIO & Lisensi K3')+'</h1><p class="sub">'+(page==='riksa'?'Monitoring kelayakan dan masa berlaku pemeriksaan peralatan.':'Monitoring pemegang sertifikat, kompetensi, dan masa berlaku lisensi.')+'</p>'+
   '<div class="cards">'+metric('Total Data',cc.total,'Data tercatat')+metric('Berlaku',cc.valid,'Masa berlaku aman')+metric('Segera Habis',cc.soon,'Jatuh tempo ≤60 hari')+metric('Kedaluwarsa',cc.expired,'Perlu tindak lanjut')+'</div>'+
   '<div class="category-grid">'+cats.map((cat,i)=>{let n=arr.filter(x=>String(x.cat||'').toLocaleUpperCase('id-ID')===cat.toLocaleUpperCase('id-ID')).length;return '<button type="button" class="category-card" onclick="selectCategory(\''+cat.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')"><span class="category-icon">'+(page==='riksa'?['🚜','⚙','▤','◉','▦'][i]:'▣')+'</span><div><b>'+cat+'</b><small>'+n+' data terdaftar</small></div><span class="category-arrow">›</span></button>'}).join('')+'</div>'+
-  '<div class="toolbar"><input id="q" placeholder="Cari nama, nomor, lokasi..." oninput="filter()"><select id="loc" onchange="filter()"><option value="">Semua lokasi</option>'+[...new Set(arr.map(x=>x.loc).filter(Boolean))].map(x=>'<option>'+esc(x)+'</option>').join('')+'</select><select id="sf" onchange="filter()"><option value="">Semua status</option><option>Berlaku</option><option>≤30 Hari</option><option>≤60 Hari</option><option>Kedaluwarsa</option></select><button type="button" class="p" onclick="openInputForm()">＋ Tambah Data</button><button class="l" onclick="importCsv()">Impor CSV</button><button class="l" onclick="exportExcel()">Ekspor Excel (.xls)</button><button class="l" onclick="printReport()">Cetak / PDF</button></div><div id="table" class="panel scroll">'+table(arr)+'</div><p class="small">Impor XLSX langsung dan pemetaan workbook historis masih tahap pengembangan. CSV saat ini hanya untuk trial.</p>';
+  '<div class="toolbar"><input id="q" placeholder="Cari nama, nomor, lokasi..." oninput="filter()"><select id="loc" onchange="filter()"><option value="">Semua lokasi</option>'+[...new Set(arr.map(x=>x.loc).filter(Boolean))].map(x=>'<option>'+esc(x)+'</option>').join('')+'</select><select id="sf" onchange="filter()"><option value="">Semua status</option><option>Berlaku</option><option>≤30 Hari</option><option>≤60 Hari</option><option>Kedaluwarsa</option></select><button type="button" class="p" onclick="openInputForm()">＋ Tambah Data</button><button class="l" onclick="downloadImportTemplate()">Unduh Template Excel</button><button class="l" onclick="importExcelTemplate()">Impor Excel</button><button class="l" onclick="exportExcel()">Ekspor Excel (.xls)</button><button class="l" onclick="printReport()">Cetak / PDF</button></div><div id="table" class="panel scroll">'+table(arr)+'</div><p class="small">Gunakan template Excel aplikasi agar nama kolom dan urutannya sesuai. Impor akan menampilkan konfirmasi sebelum data ditambahkan.</p>';
  } else {
   $('content').innerHTML='<div class="section-label">AUDIT TRAIL</div><h1 class="title">Riwayat Perubahan</h1><section class="panel scroll">'+(db.history.length?'<table><tr><th>Waktu</th><th>Modul</th><th>Aktivitas</th><th>Identitas</th></tr>'+db.history.slice().reverse().map(x=>'<tr><td>'+esc(x.at)+'</td><td>'+esc(x.mod)+'</td><td>'+esc(x.action)+'</td><td>'+esc(x.name)+'</td></tr>').join('')+'</table>':'<div class="empty">Belum ada aktivitas.</div>')+'</section>';
  }
@@ -1204,7 +1204,53 @@ let pendingCompanyLogo=null,removeLogoFlag=false;
 function previewCompanyLogo(input){const file=input.files&&input.files[0];if(!file)return;if(!['image/png','image/jpeg'].includes(file.type))return alert('Pilih PNG atau JPG.');if(file.size>2097152){input.value='';return alert('Ukuran logo maksimal 2 MB.');}const reader=new FileReader();reader.onload=()=>{pendingCompanyLogo=reader.result;removeLogoFlag=false;$('companyLogoPreview').innerHTML='<img src="'+pendingCompanyLogo+'" style="max-width:150px;max-height:90px;object-fit:contain">'};reader.readAsDataURL(file);}
 function removeCompanyLogo(){pendingCompanyLogo=null;removeLogoFlag=true;$('companyLogoPreview').innerHTML='Logo belum dipilih.';}
 function saveCompanyProfile(e){e.preventDefault();const f=new FormData(e.target),old=JSON.parse(localStorage.getItem('klj_company_profile')||'{}');const p={name:(f.get('company')||'').toLocaleUpperCase('id-ID'),region:(f.get('region')||'').toLocaleUpperCase('id-ID')};if(pendingCompanyLogo)p.logo=pendingCompanyLogo;else if(!removeLogoFlag&&old.logo)p.logo=old.logo;localStorage.setItem('klj_company_profile',JSON.stringify(p));pendingCompanyLogo=null;removeLogoFlag=false;closeModal();alert('Profil perusahaan berhasil disimpan.');}
-function importCsv(){let f=document.createElement('input');f.type='file';f.accept='.csv';f.onchange=()=>{let rd=new FileReader();rd.onload=()=>{let lines=String(rd.result).split(/\r?\n/).filter(Boolean);if(lines.length<2)return alert('CSV kosong.');let h=lines[0].split(',').map(x=>x.replace(/^"|"$/g,'').trim());if(!confirm('Tambahkan '+(lines.length-1)+' baris CSV? Header harus sesuai kolom ekspor aplikasi.'))return;let n=0;lines.slice(1).forEach(line=>{let v=line.split(',').map(x=>x.replace(/^"|"$/g,'')),o={};h.forEach((k,i)=>o[k]=v[i]||'');if(o.name){o.id=Date.now()+''+Math.random();o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';db[page].push(o);n++}});log('Impor CSV '+n+' baris','Impor data',page);save();render();alert(n+' baris ditambahkan. Periksa hasilnya.')};rd.readAsText(f.files[0])};f.click()}
+
+function importTemplateSchema(){
+ const isRiksa=page==='riksa';
+ return isRiksa?
+  [['loc','ESTATE / LOKASI'],['name','NAMA / IDENTITAS'],['cat','KATEGORI'],['io','NOMOR IO'],['frame','NOMOR RANGKA'],['engine','NOMOR MESIN'],['year','TAHUN PEMBUATAN'],['capacity','HP / KAPASITAS'],['unit','TYPE MESIN / MERK ALAT'],['equipmentStatus','STATUS PERALATAN'],['no','NOMOR SERTIFIKAT'],['issued','TANGGAL RIKSA UJI (YYYY-MM-DD)'],['validity','MASA BERLAKU'],['due','TANGGAL JATUH TEMPO (YYYY-MM-DD)'],['issuer','PELAKSANA / PENERBIT'],['regulation','PERATURAN & PERUNDANGAN'],['notes','KETERANGAN']]:
+  [['loc','ESTATE / LOKASI'],['name','NAMA PEMEGANG LISENSI'],['cat','KATEGORI'],['licenseType','JENIS LISENSI'],['unit','UNIT MESIN / ALAT BERAT'],['no','NOMOR PERIZINAN / REGISTRASI'],['validity','MASA BERLAKU (1-5 TAHUN / SELAMANYA)'],['due','TANGGAL JATUH TEMPO (YYYY-MM-DD)'],['issued','TANGGAL TERBIT (OTOMATIS JIKA KOSONG)'],['employment','STATUS KEPEGAWAIAN (AKTIF/RESIGN)'],['issuer','PELAKSANA TRAINING / PENERBIT'],['regulation','PERATURAN & PERUNDANGAN'],['compliance','KETAATAN PERATURAN'],['notes','KETERANGAN']];
+}
+function downloadImportTemplate(){
+ const schema=importTemplateSchema(),escXml=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ const title=page==='riksa'?'TEMPLATE IMPORT MONITORING RIKSA UJI':'TEMPLATE IMPORT SIO & LISENSI K3';
+ const rows=[['PT KRUING LESTARI JAYA'],[title],schema.map(x=>x[1]),schema.map(()=> '')];
+ const xml='<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#102B46" ss:Pattern="Solid"/></Style></Styles><Worksheet ss:Name="DATA IMPORT"><Table>'+rows.map((row,i)=>'<Row>'+row.map(v=>'<Cell'+(i===2?' ss:StyleID="h"':'')+'><Data ss:Type="String">'+escXml(v)+'</Data></Cell>').join('')+'</Row>').join('')+'</Table></Worksheet></Workbook>';
+ download(xml,'Template_Import_'+(page==='riksa'?'Riksa_Uji':'SIO_Lisensi')+'.xls','application/vnd.ms-excel');
+}
+function importExcelTemplate(){
+ const f=document.createElement('input');f.type='file';f.accept='.xls,.xml';f.onchange=()=>{
+  const file=f.files&&f.files[0];if(!file)return;
+  const reader=new FileReader();reader.onload=()=>{
+   try{
+    const doc=new DOMParser().parseFromString(String(reader.result),'application/xml');
+    if(doc.querySelector('parsererror'))throw Error('File bukan template Excel yang didukung.');
+    const ws=Array.from(doc.getElementsByTagNameNS('urn:schemas-microsoft-com:office:spreadsheet','Worksheet'));
+    if(!ws.length)throw Error('Sheet DATA IMPORT tidak ditemukan. Gunakan template dari aplikasi.');
+    const rows=Array.from(ws[0].getElementsByTagNameNS('urn:schemas-microsoft-com:office:spreadsheet','Row')).map(row=>Array.from(row.getElementsByTagNameNS('urn:schemas-microsoft-com:office:spreadsheet','Data')).map(d=>d.textContent.trim()));
+    const schema=importTemplateSchema(),headerIndex=rows.findIndex(row=>schema.every(x=>row.includes(x[1])));
+    if(headerIndex<0)throw Error('Header tidak sesuai template modul ini. Unduh template terbaru dari aplikasi.');
+    const header=rows[headerIndex],records=rows.slice(headerIndex+1).filter(row=>row.some(v=>v&&v.trim())).map(row=>{
+     const o={};schema.forEach(([key,label])=>{const idx=header.indexOf(label);o[key]=(row[idx]||'').trim()});
+     if(o.due&&/^\d{4}-\d{2}-\d{2}$/.test(o.due)===false)o.due='';
+     if(o.issued&&/^\d{4}-\d{2}-\d{2}$/.test(o.issued)===false)o.issued='';
+     if(page==='sio'&&o.validity&&o.due&&!o.issued&&o.validity.toUpperCase()!=='SELAMANYA'){const m=o.validity.match(/(\d+)/);if(m){const d=new Date(o.due+'T12:00:00');d.setFullYear(d.getFullYear()-Number(m[1]));o.issued=d.toISOString().slice(0,10)}}
+     return o;
+    }).filter(o=>o.name);
+    if(!records.length)throw Error('Tidak ada baris data yang dapat diimpor. Isi data mulai baris ke-4.');
+    const existing=db[page],keySet=new Set(existing.map(x=>(String(x.no||'').trim().toLowerCase()+'|'+String(x.name||'').trim().toLowerCase())));
+    const fresh=records.filter(o=>!keySet.has(String(o.no||'').trim().toLowerCase()+'|'+String(o.name||'').trim().toLowerCase()));
+    const dup=records.length-fresh.length;
+    const preview=fresh.slice(0,5).map(x=>x.name).join(', ');
+    if(!fresh.length){alert('Tidak ada data baru. '+dup+' baris terdeteksi duplikat.');return;}
+    if(!confirm('PREVIEW IMPORT '+(page==='riksa'?'RIKSA UJI':'SIO & LISENSI')+'\n\nBaris terbaca: '+records.length+'\nData baru: '+fresh.length+'\nDuplikat dilewati: '+dup+'\nContoh: '+preview+'\n\nTambahkan data baru tanpa menghapus data lama?'))return;
+    fresh.forEach((o,i)=>{o.id=Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2);o.mod=page==='riksa'?'Riksa Uji':'SIO & Lisensi';if(page==='riksa')o.inspections=o.inspections||[];});
+    db[page].push(...fresh);log('Impor Excel '+fresh.length+' baris','Impor data',page);save();render();alert(fresh.length+' data berhasil ditambahkan. '+dup+' duplikat dilewati.');
+   }catch(e){alert('Impor gagal: '+e.message)}
+  };reader.readAsText(file);
+ };f.click();
+}
+
 function download(data,name,type){let u=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}function backup(){download(JSON.stringify(db,null,2),'backup_klj_riksa_sio.json','application/json')}function restore(){let f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=()=>{let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!Array.isArray(x.riksa)||!Array.isArray(x.sio))throw 0;if(confirm('Restore akan mengganti data pada browser ini. Lanjutkan?')){db={riksa:x.riksa,sio:x.sio,history:x.history||[]};save();render()}}catch(e){alert('File backup tidak valid.')}};rd.readAsText(f.files[0])};f.click()}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}init();
 </script></body></html>
