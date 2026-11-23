@@ -543,6 +543,18 @@ th{background:#102b46!important;color:#fff!important}
 @media(max-width:850px){.wrap{padding:20px}.top{padding:0 18px}}
 @media(max-width:560px){.wrap{padding:14px}.welcome{padding:20px;min-height:145px}.welcome h1{font-size:22px}}
 
+
+/* Desktop login artwork: preserve the original image ratio, avoid horizontal stretch/crop */
+@media(min-width:761px){
+ #login.login:before{
+  background-size:contain!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  background-color:#0b2934!important;
+ }
+ #login .loginform{width:min(390px,calc(100% - 48px))!important}
+}
+
 </style><style>
 /* v1.15 — final login layout: full poster, centered-lower glass panel, strong typography */
 @media(max-width:760px){
